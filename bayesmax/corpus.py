@@ -7,7 +7,7 @@ this_directory = os.path.dirname(os.path.realpath(__file__))
 
 def read_tsv(filename):
     """ Lazy corpus reader that yields documents and labels in numpy array. """
-    docs, labels = zip(*[line.split('\t') for line in 
+    docs, labels = zip(*[line.strip().split('\t') for line in 
                          io.open(filename, 'r')])
     docs = np.array(docs)
     labels = np.array(labels)
@@ -53,7 +53,7 @@ class DSLCC:
                        'test':'/data/DSLCC-v2.0/test/test.txt',
                        'test-none':'/data/DSLCC-v2.0/test/test-none.txt',
                        'gold':'/data/DSLCC-v2.0/gold/test-gold.txt',
-                       'gold-none':'/data/DSLCC-v2.0/test/test-none-gold.txt',
+                       'gold-none':'/data/DSLCC-v2.0/gold/test-none-gold.txt',
                        },
                  
                  2.1: {'train':'/data/DSLCC-v2.1/train-dev/train.txt',
@@ -73,7 +73,7 @@ class DSLCC:
         
         filename = this_directory + self.files[option]
         
-        if option == 'test':
+        if option in ['test', 'test-none', 'test-eng']:
             return np.array(list(sents(filename)))
         
         return read_tsv(filename)
