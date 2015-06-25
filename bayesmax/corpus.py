@@ -1,17 +1,28 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import io, os
+import io, os, re
 
 this_directory = os.path.dirname(os.path.realpath(__file__))
 
-def read_tsv(filename):
+def blind_ne(text):
+    return re.sub(r'[A-Z]\S+\s*', ' #NE# ', text)
+
+def blind_ne_without_first(text):
+    # Keep the first word unchanged.
+    first_word, _, the_rest = text.partition(' ')
+    blinded_text = first_word + ' ' + blind_ne(text)    
+    # Removes extra whitespaces.
+    blinded_text = " ".join(blinded_text.split(' '))
+    return blinded_text
+
+def read_tsv(filename, blindne=False):
     """ Lazy corpus reader that yields documents and labels in numpy array. """
     docs, labels = zip(*[line.strip().split('\t') for line in 
                          io.open(filename, 'r')])
-    docs = np.array(docs)
-    labels = np.array(labels)
-    return docs, labels
+    if blindne:
+        docs = [blind_ne_without_first(d) for d in docs]
+    return np.array(docs), np.array(labels)
 
 def sents(infile):
     """ Lazy corpus reader that yields line. """
@@ -62,7 +73,7 @@ class DSLCC:
                  }
         return files[version]
     
-    def data(self, option):
+    def data(self, option, blindne=False):
         possible = ['train', 'devel', 'test', 'gold']
         if self.version == 1.0:
             possible += ['test-eng', 'gold-eng']
@@ -76,7 +87,10 @@ class DSLCC:
         if option in ['test', 'test-none', 'test-eng']:
             return np.array(list(sents(filename)))
         
-        return read_tsv(filename)
+        if blindne==False:
+            return read_tsv(filename)
+        else:
+            return read_tsv(filename, blindne=True)
 
 ''' 
 corpus = DSLCC(version=2.0)

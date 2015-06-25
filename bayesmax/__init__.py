@@ -3,3 +3,4 @@
 import corpus
 import bayesline
 import evaluate
+import bayesline as baseline
