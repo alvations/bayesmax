@@ -1,1 +1,1 @@
-# baysemax
+# bayesmax
